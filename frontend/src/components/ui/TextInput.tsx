@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes } from "react";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -6,8 +6,9 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const TextInput = forwardRef<HTMLInputElement, Props>(
-  ({ label, error, id, className = "", ...rest }, ref) => {
-    const inputId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+  function TextInput({ label, error, className = "", ...rest }, ref) {
+    const generatedId = useId();
+    const inputId = rest.id ?? generatedId;
     return (
       <div className={className}>
         <label

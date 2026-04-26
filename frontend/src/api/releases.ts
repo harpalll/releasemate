@@ -6,11 +6,17 @@ import type {
 
 const BASE = "/api/releases";
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+async function request<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (options?.body) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const res = await fetch(url, { ...options, headers: { ...headers, ...options?.headers } });
+
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new Error(body?.error ?? `Request failed: ${res.status}`);

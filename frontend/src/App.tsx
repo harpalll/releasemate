@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReleasesListPage } from "./pages/ReleasesListPage";
 import { ReleaseDetailPage } from "./pages/ReleaseDetailPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,6 +18,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<ReleasesListPage />} />
             <Route path="/releases/:id" element={<ReleaseDetailPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </BrowserRouter>

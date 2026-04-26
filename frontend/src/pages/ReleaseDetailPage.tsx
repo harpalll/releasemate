@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { Check, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { releasesApi } from "../api/releases";
@@ -26,18 +26,19 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function ReleaseDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isNew = id === "new";
 
-  const { data: release, isLoading } = useQuery({
+  const { data: release, isLoading, isFetched } = useQuery({
     queryKey: ["release", id],
-    queryFn: () => releasesApi.get(id!),
+    queryFn: () => releasesApi.get(id),
     enabled: !isNew,
   });
 
   const [steps, setSteps] = useState<number[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -66,15 +67,18 @@ export function ReleaseDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["releases"] });
       navigate(`/releases/${created.id}`);
     },
+    onError: () => setError("Failed to create release. Please try again."),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ data }: { data: Parameters<typeof releasesApi.update>[1] }) =>
-      releasesApi.update(id!, data),
+      releasesApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["releases"] });
       queryClient.invalidateQueries({ queryKey: ["release", id] });
+      setError(null);
     },
+    onError: () => setError("Failed to save changes. Please try again."),
   });
 
   const deleteMutation = useMutation({
@@ -83,6 +87,7 @@ export function ReleaseDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["releases"] });
       navigate("/");
     },
+    onError: () => setError("Failed to delete release. Please try again."),
   });
 
   function toggleStep(index: number, checked: boolean) {
@@ -105,7 +110,7 @@ export function ReleaseDetailPage() {
 
   function handleDelete() {
     if (!confirm("Delete this release? This cannot be undone.")) return;
-    deleteMutation.mutate(id!);
+    deleteMutation.mutate(id);
   }
 
   if (!isNew && isLoading) {
@@ -117,7 +122,7 @@ export function ReleaseDetailPage() {
     );
   }
 
-  if (!isNew && !release && !isLoading) {
+  if (!isNew && isFetched && !release) {
     return (
       <BrowserFrame>
         <PageHeader />
@@ -154,6 +159,12 @@ export function ReleaseDetailPage() {
           )}
         </div>
 
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <TextInput
@@ -176,7 +187,7 @@ export function ReleaseDetailPage() {
               <div className="rounded-lg border border-border divide-y divide-border/50 px-4">
                 {RELEASE_STEPS.map((step, i) => (
                   <CheckboxField
-                    key={i}
+                    key={step}
                     label={step}
                     checked={steps.includes(i)}
                     onChange={(checked) => toggleStep(i, checked)}

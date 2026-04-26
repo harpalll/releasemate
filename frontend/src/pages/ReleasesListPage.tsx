@@ -1,6 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Trash2, PlusCircle, Inbox } from "lucide-react";
+import { Eye, Trash2, PlusCircle, Inbox, AlertCircle } from "lucide-react";
 import { releasesApi } from "../api/releases";
 import { BrowserFrame } from "../components/layout/BrowserFrame";
 import { PageHeader } from "../components/layout/PageHeader";
@@ -14,7 +14,7 @@ export function ReleasesListPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: releases = [], isLoading } = useQuery({
+  const { data: releases = [], isLoading, isError } = useQuery({
     queryKey: ["releases"],
     queryFn: releasesApi.list,
   });
@@ -35,15 +35,23 @@ export function ReleasesListPage() {
       <Card>
         <div className="mb-4 flex items-center justify-between">
           <Breadcrumb items={[{ label: "All releases" }]} />
-          <Link to="/releases/new">
-            <Button icon={<PlusCircle size={16} />}>New release</Button>
-          </Link>
+          <Button
+            icon={<PlusCircle size={16} />}
+            onClick={() => navigate("/releases/new")}
+          >
+            New release
+          </Button>
         </div>
 
         {isLoading ? (
           <p className="py-12 text-center text-sm text-text-muted">
             Loading...
           </p>
+        ) : isError ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-red-500">
+            <AlertCircle size={40} strokeWidth={1.5} />
+            <p className="text-sm">Failed to load releases. Please try again.</p>
+          </div>
         ) : releases.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-text-muted">
             <Inbox size={40} strokeWidth={1.5} />
@@ -54,10 +62,10 @@ export function ReleasesListPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border text-xs uppercase tracking-wider text-text-muted">
-                  <th className="pb-3 pr-4 font-medium">Release</th>
-                  <th className="pb-3 pr-4 font-medium">Date</th>
-                  <th className="pb-3 pr-4 font-medium">Status</th>
-                  <th className="pb-3 font-medium text-right">Actions</th>
+                  <th scope="col" className="pb-3 pr-4 font-medium">Release</th>
+                  <th scope="col" className="pb-3 pr-4 font-medium">Date</th>
+                  <th scope="col" className="pb-3 pr-4 font-medium">Status</th>
+                  <th scope="col" className="pb-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>

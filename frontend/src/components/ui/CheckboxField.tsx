@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface Props {
   label: string;
   checked: boolean;
@@ -5,7 +7,7 @@ interface Props {
 }
 
 export function CheckboxField({ label, checked, onChange }: Props) {
-  const id = label.toLowerCase().replace(/\s+/g, "-").slice(0, 40);
+  const id = useId();
   return (
     <label
       htmlFor={id}
