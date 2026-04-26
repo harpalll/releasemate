@@ -12,7 +12,8 @@ app.use(express.json());
 
 app.use("/api/releases", releaseRoutes);
 
-const publicDir = path.join(import.meta.dir, "..", "public");
+const publicDir = path.resolve(process.cwd(), "public");
+console.log("Serving static files from:", publicDir);
 app.use(express.static(publicDir));
 app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));
