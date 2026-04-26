@@ -1,4 +1,4 @@
-# ReleaseMate
+# releasemate
 
 A release checklist tool that helps developers track their release process. Built as a single-page application with a REST API backend.
 
