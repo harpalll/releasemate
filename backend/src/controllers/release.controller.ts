@@ -1,19 +1,27 @@
 import type { Request, Response } from "express";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { releaseService } from "../services/release.service";
+
+const dateString = z.string().refine((val) => !isNaN(Date.parse(val)), {
+  message: "Invalid date format",
+});
 
 const createSchema = z.object({
   name: z.string().min(1),
-  date: z.string().min(1),
+  date: dateString,
   additionalInfo: z.string().optional(),
 });
 
-const updateSchema = z.object({
-  name: z.string().min(1).optional(),
-  date: z.string().min(1).optional(),
-  additionalInfo: z.string().optional(),
-  completedSteps: z.array(z.number().int().min(0)).optional(),
-});
+const updateSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    date: dateString.optional(),
+    additionalInfo: z.string().optional(),
+    completedSteps: z.array(z.number().int().min(0)).optional(),
+  })
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: "At least one field is required",
+  });
 
 export const releaseController = {
   async list(_req: Request, res: Response) {

@@ -26,25 +26,39 @@ export const releaseService = {
       completedSteps?: number[];
     },
   ) {
-    const existing = await releaseRepository.findById(id);
-    if (!existing) return null;
-
-    return releaseRepository.update(id, {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.date !== undefined && { date: new Date(data.date) }),
-      ...(data.additionalInfo !== undefined && {
-        additionalInfo: data.additionalInfo,
-      }),
-      ...(data.completedSteps !== undefined && {
-        completedSteps: data.completedSteps,
-      }),
-    });
+    try {
+      return await releaseRepository.update(id, {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.date !== undefined && { date: new Date(data.date) }),
+        ...(data.additionalInfo !== undefined && {
+          additionalInfo: data.additionalInfo,
+        }),
+        ...(data.completedSteps !== undefined && {
+          completedSteps: data.completedSteps,
+        }),
+      });
+    } catch (err: unknown) {
+      if (isPrismaNotFound(err)) return null;
+      throw err;
+    }
   },
 
   async delete(id: string) {
-    const existing = await releaseRepository.findById(id);
-    if (!existing) return null;
-    await releaseRepository.delete(id);
-    return true;
+    try {
+      await releaseRepository.delete(id);
+      return true;
+    } catch (err: unknown) {
+      if (isPrismaNotFound(err)) return null;
+      throw err;
+    }
   },
 };
+
+function isPrismaNotFound(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: string }).code === "P2025"
+  );
+}
