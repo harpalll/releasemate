@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: releasemate
+      POSTGRES_PASSWORD: releasemate
+      POSTGRES_DB: releasemate
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://releasemate:releasemate@db:5432/releasemate
+      PORT: 3001
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
