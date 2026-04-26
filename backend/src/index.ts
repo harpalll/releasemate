@@ -14,7 +14,7 @@ app.use("/api/releases", releaseRoutes);
 
 const publicDir = path.join(import.meta.dir, "..", "public");
 app.use(express.static(publicDir));
-app.get("*", (_req, res) => {
+app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));
 });
 
