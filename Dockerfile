@@ -19,4 +19,4 @@ FROM backend-deps AS production
 COPY backend/ .
 COPY --from=frontend-build /app/dist ./public
 EXPOSE 3001
-CMD ["sh", "-c", "bunx prisma db push --skip-generate && bun run src/index.ts"]
+CMD ["bun", "run", "src/index.ts"]
