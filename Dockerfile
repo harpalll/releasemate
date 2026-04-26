@@ -3,6 +3,8 @@ WORKDIR /app
 
 FROM base AS backend-deps
 COPY backend/package.json backend/bun.lock ./
+COPY backend/prisma ./prisma
+COPY backend/prisma.config.ts ./
 RUN bun install --frozen-lockfile
 
 FROM base AS frontend-deps
