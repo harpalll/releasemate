@@ -10,8 +10,13 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U releasemate"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  backend:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,7 +27,8 @@ services:
       DATABASE_URL: postgresql://releasemate:releasemate@db:5432/releasemate
       PORT: 3001
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:
