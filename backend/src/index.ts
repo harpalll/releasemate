@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import cors from "cors";
 import { config } from "./config";
@@ -10,6 +11,12 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/releases", releaseRoutes);
+
+const publicDir = path.join(import.meta.dir, "..", "public");
+app.use(express.static(publicDir));
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(publicDir, "index.html"));
+});
 
 app.use(errorHandler);
 
